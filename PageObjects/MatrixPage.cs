@@ -39,8 +39,8 @@ namespace PageObjects
                 action.DoubleClick(matrix).Perform();
             }
 
-            Driver.Wait(20, () => Driver.Instance.FindElementsNoWait(By.ClassName("ag-header-group-text"))
-                                                            .FirstOrDefault(x => x.Text == "Product Offer Info") != null);
+            Driver.Wait(20, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".page-title"))
+                                                            .FirstOrDefault(x => x.Text == matrixName) != null);
                                                       
         }
     }

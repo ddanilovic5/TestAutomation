@@ -11,13 +11,11 @@ namespace PageObjects
         private IWebElement EmailField => Driver.Instance.FindElement(By.Id("okta-signin-username"));
         private IWebElement PasswordField => Driver.Instance.FindElement(By.Id("okta-signin-password"));
         private IWebElement SignInButton => Driver.Instance.FindElement(By.Id("okta-signin-submit"));
-        private string FormSubtitle => Driver.Instance.FindElement(By.ClassName("auth-form--subtitle")).Text;
-
 
         public void SignInAs(string username, string password = "Xfiles01a!")
         {
             GoTo();
-            Driver.Wait(30, () => FormSubtitle != "Log into Your Account.");
+            Driver.Wait(30, () => Driver.Instance.FindElementsNoWait(By.ClassName("auth-form--subtitle")).Count != 0);
 
             string email = "";
 
