@@ -1,5 +1,6 @@
 ﻿using PageObjects;
 using TechTalk.SpecFlow;
+using FluentAssertions;
 
 namespace Tests.StepDefinitions
 {
@@ -8,8 +9,9 @@ namespace Tests.StepDefinitions
     {
         private string _matrixName;
         private string _manufacturerName;
-        private LoginPage _loginPage = new LoginPage();
-        private MatrixPage _matrixPage = new MatrixPage();
+        private LoginPage _loginPage;
+        private MatrixPage _matrixPage;
+        private ProductOfferPage _poPage;
 
         [Given(@"Matrix called ""([^""]*)"" is already created")]
         public void GivenMatrixCalledIsAlreadyCreated(string testingMatrix)
@@ -26,43 +28,49 @@ namespace Tests.StepDefinitions
         [Given(@"'([^']*)' is logged in")]
         public void GivenIsLoggedIn(string user)
         {
+            _loginPage = new LoginPage();
             _loginPage.SignInAs(user);
         }
 
         [Given(@"User clicks on Create Product Offer button")]
         public void GivenUserClicksOnCreateProductOfferButton()
         {
+            _matrixPage = new MatrixPage();
             _matrixPage.OpenMatrixDetails(_matrixName);
+             
+            _poPage= new ProductOfferPage();
+            _poPage.CreatePOButtonClick();
         }
 
         [Given(@"Selects Product called ""([^""]*)""")]
-        public void GivenSelectsProductCalled(string lemons)
+        public void GivenSelectsProductCalled(string productName)
         {
-            throw new PendingStepException();
+            _poPage.SelectProduct(productName);
         }
 
         [Given(@"CPC is automatically filled with value ""([^""]*)""")]
-        public void GivenCPCIsAutomaticallyFilledWithValue(string anticoagulant)
+        public void GivenCPCIsAutomaticallyFilledWithValue(string cpcValue)
         {
-            throw new PendingStepException();
+            _poPage.VerifyCPCHasValue(cpcValue).Should().BeTrue($"CPC value is not as expected. Expected value - {cpcValue}");
         }
 
         [Given(@"Effective date is current date")]
         public void GivenEffectiveDateIsCurrentDate()
         {
-            throw new PendingStepException();
-        }
-
-        [Given(@"Primary Rate type is ""([^""]*)""")]
-        public void GivenPrimaryRateTypeIs(string p0)
-        {
-            throw new PendingStepException();
+            DateTime currentDate = DateTime.Now.Date;
+            _poPage.AddEffectiveDate(currentDate);
         }
 
         [Given(@"Participant assignment is ""([^""]*)""")]
         public void GivenParticipantAssignmentIs(string humana)
         {
-            throw new PendingStepException();
+            _poPage.AssignParticipants(humana);
+        }
+
+        [Given(@"Primary Rate type is ""([^""]*)""")]
+        public void GivenPrimaryRateTypeIs(string primaryRate)
+        {
+            _poPage.SelectPrimaryRateType(primaryRate);
         }
 
         [Given(@"(.*) has Bid with value of (.*)%")]

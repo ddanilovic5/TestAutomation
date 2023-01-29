@@ -21,8 +21,4 @@
     <ProjectReference Include="..\SeleniumHelpers\SeleniumHelpers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Drivers\" />
-  </ItemGroup>
-
 </Project>

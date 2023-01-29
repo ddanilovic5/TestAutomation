@@ -54,9 +54,9 @@ namespace SeleniumHelpers
         {
             try
             {
-                var fileName = Path.Combine($"{Path.GetTempPath()}", $"{testName}_{DateTime.UtcNow:yyyyMMdd}.jpg");
+                var fileName = Path.Combine($"{Path.GetTempPath()}", $"{testName}_{DateTime.UtcNow:yyyyMMdd}.png");
                 var ss = ((ITakesScreenshot)Instance).GetScreenshot();
-                ss.SaveAsFile(fileName, ScreenshotImageFormat.Jpeg);
+                ss.SaveAsFile(fileName, ScreenshotImageFormat.Png);
                 return fileName;
             }
             catch (Exception e)
@@ -68,6 +68,7 @@ namespace SeleniumHelpers
 
         public static void QuitDriver()
         {
+            Instance?.Close();
             Instance?.Quit();
         }
     }

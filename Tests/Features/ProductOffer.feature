@@ -9,11 +9,11 @@ Background:
 Scenario Outline: Create new Product Offer with different user roles NEG/CS/MFG
 	Given '<User>' is logged in
 	And User clicks on Create Product Offer button
-	And Selects Product called "Lemons"
-	And CPC is automatically filled with value "Anticoagulant"
+	And Selects Product called "Branko Test Product 1"
+	And CPC is automatically filled with value "Weight Loss"
 	And Effective date is current date
-	And Primary Rate type is "Base Rebate"
 	And Participant assignment is "Humana"
+	And Primary Rate type is "Base Rebate"
 	And 1:1 has Bid with value of 10%
 	And PB Footnote text is "Testing PB footnote" with "Humana" participants
 	And NPB Rate has bid of 10% for Access Restricted
