@@ -70,6 +70,7 @@ namespace PageObjects
 
         public void SelectProduct(string productName)
         {
+            Driver.Wait(3, () => ProductDropdown.Displayed);
             ProductDropdown.Click();
 
             IWebElement choosenProduct = FetchAllProducts().FirstOrDefault( x=> x.Text.Trim() == productName);
@@ -104,7 +105,7 @@ namespace PageObjects
             participant.Click();
             
             IWebElement selectedItem = ParticipantAssignmentDropdown.FindElement(DropdownSelectedValuesLocator);
-            selectedItem.Click(); // to remove dropdown
+            ProductDetailsSection.Click(); // to remove dropdown
 
             if (!selectedItem.Text.Contains(participantName))
                 throw new Exception($"Participant - {participantName} was not selected.");
@@ -122,7 +123,7 @@ namespace PageObjects
             rate.Click();
 
             IWebElement selectedRate = PrimaryRateDropdown.FindElement(DropdownSelectedValuesLocator);
-            selectedRate.Click(); // to remove dropdown
+            PrefferedBrandRatesSection.Click(); // to remove dropdown
 
             if (!selectedRate.Text.Contains(primaryRate))
                 throw new Exception($"Primary rate - {primaryRate} was not selected.");
