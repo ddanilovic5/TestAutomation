@@ -17,8 +17,8 @@ Scenario Outline: Create new Product Offer with different user roles NEG/CS/MFG
 	And 1:1 has Bid with value of 10%
 	And PB Footnote text is "Testing PB footnote" with "Humana" participants
 	And NPB Rate has bid of 10% for Access Restricted
-	And NPB Footnote text is "NPB Footnote" for All Participants
-	When User clicks on Create button
+	And NPB Footnote text is "NPB Footnote" with "All Participants"
+	When I create Product Offer
 	Then Succesfully added dialog is shown
 	And New Product Offer is shown in the list
 	And Primary Rate type should be "Base Rebate"

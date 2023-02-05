@@ -12,6 +12,7 @@ namespace Tests.StepDefinitions
         private LoginPage _loginPage;
         private MatrixPage _matrixPage;
         private ProductOfferPage _poPage;
+        private CreateProductOfferDialog _poDialog;
 
         [Given(@"Matrix called ""([^""]*)"" is already created")]
         public void GivenMatrixCalledIsAlreadyCreated(string testingMatrix)
@@ -45,58 +46,62 @@ namespace Tests.StepDefinitions
         [Given(@"Selects Product called ""([^""]*)""")]
         public void GivenSelectsProductCalled(string productName)
         {
-            _poPage.SelectProduct(productName);
+            _poDialog = new CreateProductOfferDialog();
+            _poDialog.SelectProduct(productName);
         }
 
         [Given(@"CPC is automatically filled with value ""([^""]*)""")]
         public void GivenCPCIsAutomaticallyFilledWithValue(string cpcValue)
         {
-            _poPage.VerifyCPCHasValue(cpcValue).Should().BeTrue($"CPC value is not as expected. Expected value - {cpcValue}");
+            _poDialog.VerifyCPCHasValue(cpcValue).Should().BeTrue($"CPC value is not as expected. Expected value - {cpcValue}");
         }
 
         [Given(@"Effective date is current date")]
         public void GivenEffectiveDateIsCurrentDate()
         {
             DateTime currentDate = DateTime.Now.Date;
-            _poPage.AddEffectiveDate(currentDate);
+            _poDialog.AddEffectiveDate(currentDate);
         }
 
         [Given(@"Participant assignment is ""([^""]*)""")]
         public void GivenParticipantAssignmentIs(string humana)
         {
-            _poPage.AssignParticipants(humana);
+            _poDialog.AssignParticipants(humana);
         }
 
         [Given(@"Primary Rate type is ""([^""]*)""")]
         public void GivenPrimaryRateTypeIs(string primaryRate)
         {
-            _poPage.SelectPrimaryRateType(primaryRate);
+            _poDialog.SelectPrimaryRateType(primaryRate);
         }
 
         [Given(@"(.*) has Bid with value of (.*)%")]
-        public void GivenHasBidWithValueOf(Decimal p0, int p1)
+        public void GivenHasBidWithValueOf(string p0, int bidValue)
         {
-            throw new PendingStepException();
+            _poDialog.ControlledBid(bidValue.ToString());
         }
 
         [Given(@"PB Footnote text is ""([^""]*)"" with ""([^""]*)"" participants")]
-        public void GivenPBFootnoteTextIsWithParticipants(string p0, string humana)
+        public void GivenPBFootnoteTextIsWithParticipants(string pbfText, string participants)
         {
-            throw new PendingStepException();
+            _poDialog.TypePBFText(pbfText);
+            _poDialog.AddPBFParticipant(participants);
+            _poDialog.SavePBF();
         }
 
         [Given(@"NPB Rate has bid of (.*)% for Access Restricted")]
-        public void GivenNPBRateHasBidOfForAccessRestricted(int p0)
+        public void GivenNPBRateHasBidOfForAccessRestricted(int bidValue)
         {
-            throw new PendingStepException();
+            _poDialog.NPBRatesBid(bidValue.ToString());
         }
 
-        [Given(@"NPB Footnote text is ""([^""]*)"" for All Participants")]
-        public void GivenNPBFootnoteTextIsForAllParticipants(string p0)
+        [Given(@"NPB Footnote text is ""([^""]*)"" with ""([^""]*)""")]
+        public void GivenNPBFootnoteTextIsWithAllParticipants(string npbfText, string participants)
         {
-            throw new PendingStepException();
+            _poDialog.TypeNPBFText(npbfText);
+            _poDialog.AddPBFParticipant(participants);
+            _poDialog.SavePBF();
         }
-
 
         [Given(@"Product Offer is already created")]
         public void GivenProductOfferIsAlreadyCreated()
@@ -104,11 +109,10 @@ namespace Tests.StepDefinitions
             throw new PendingStepException();
         }
 
-
-        [When(@"User clicks on Create button")]
-        public void WhenUserClicksOnCreateButton()
+        [When(@"I create Product Offer")]
+        public void WhenICreateProductOffer()
         {
-            throw new PendingStepException();
+            _poDialog.ClickOnCreatePO();
         }
 
         [Then(@"Succesfully added dialog is shown")]
