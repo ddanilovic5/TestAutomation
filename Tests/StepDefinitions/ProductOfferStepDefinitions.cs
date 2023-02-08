@@ -98,9 +98,9 @@ namespace Tests.StepDefinitions
         [Given(@"NPB Footnote text is ""([^""]*)"" with ""([^""]*)""")]
         public void GivenNPBFootnoteTextIsWithAllParticipants(string npbfText, string participants)
         {
-            _poDialog.TypeNPBFText(npbfText);
-            _poDialog.AddPBFParticipant(participants);
-            _poDialog.SavePBF();
+            _poDialog.TypeNonPBFText(npbfText);
+            _poDialog.AddNonPBFParticipant(participants);
+            _poDialog.SaveNonPBF();
         }
 
         [Given(@"Product Offer is already created")]
@@ -118,49 +118,52 @@ namespace Tests.StepDefinitions
         [Then(@"Succesfully added dialog is shown")]
         public void ThenSuccesfullyAddedDialogIsShown()
         {
-            throw new PendingStepException();
+            _poPage.VerifySuccessMessage().Should().BeTrue("Success Message didn't appear after PO creation.");
         }
 
-        [Then(@"New Product Offer is shown in the list")]
-        public void ThenNewProductOfferIsShownInTheList()
+
+        [Then(@"New Product Offer is shown in the list with the name ""([^""]*)""")]
+        public void ThenNewProductOfferIsShownInTheListWithTheName(string productName)
         {
-            throw new PendingStepException();
+            _poPage.VerifyProductIsInTheList(productName).Should().BeTrue($"Previously created product - {productName} is not shown in the product list.");
         }
 
         [Then(@"Primary Rate type should be ""([^""]*)""")]
-        public void ThenPrimaryRateTypeShouldBe(string p0)
+        public void ThenPrimaryRateTypeShouldBe(string primaryRate)
         {
-            throw new PendingStepException();
+            _poPage.VerifyPrimaryRateTypes(primaryRate).Should().BeTrue($"Primary rate is not as expected. Expected to be - {primaryRate}");
         }
 
         [Then(@"CPC should be ""([^""]*)""")]
-        public void ThenCPCShouldBe(string anticoagulant)
+        public void ThenCPCShouldBe(string cpc)
         {
-            throw new PendingStepException();
+            _poPage.VerifyCPC(cpc).Should().BeTrue($"CPC value is not as expected. Expected to be - {cpc}");
         }
 
         [Then(@"(.*) in Controlled Rebates should be ""([^""]*)""")]
-        public void ThenInControlledRebatesShouldBe(Decimal p0, string p1)
+        public void ThenInControlledRebatesShouldBe(string ratio, string value)
         {
-            throw new PendingStepException();
+            _poPage.VerifyControlledRebates(ratio, value).Should().BeTrue($"Controlled rebate {ratio} doesn't have expected value of {value}");
         }
 
-        [Then(@"Footnote text should be ""([^""]*)""")]
-        public void ThenFootnoteTextShouldBe(string p0)
+        [Then(@"PB Footnote text should be ""([^""]*)""")]
+        public void ThenPBFootnoteTextShouldBe(string text)
         {
-            throw new PendingStepException();
+            _poPage.ViewFootnotesButtonClick();
+            _poPage.VerifyFootnotePresent(text).Should().BeTrue($"Footnote with text - '{text}' is not present.");
+            _poPage.CloseFootnoteButtonClick();
         }
 
         [Then(@"Effective date should be current date")]
         public void ThenEffectiveDateShouldBeCurrentDate()
         {
-            throw new PendingStepException();
+            _poPage.VerifyEffectiveStartDate(DateTime.Now.Date).Should().BeTrue("Effective date is not current date.");
         }
 
         [Then(@"Status is ""([^""]*)""")]
-        public void ThenStatusIs(string @new)
+        public void ThenStatusIs(string status)
         {
-            throw new PendingStepException();
+            _poPage.VerifyPOStatus(status).Should().BeTrue($"Product Offer status is not as expected. Expected to be - {status}");
         }
 
 

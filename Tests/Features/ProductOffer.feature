@@ -20,11 +20,11 @@ Scenario Outline: Create new Product Offer with different user roles NEG/CS/MFG
 	And NPB Footnote text is "NPB Footnote" with "All Participants"
 	When I create Product Offer
 	Then Succesfully added dialog is shown
-	And New Product Offer is shown in the list
+	And New Product Offer is shown in the list with the name "Branko Test Product 1"
 	And Primary Rate type should be "Base Rebate"
 	And CPC should be "Anticoagulant"
 	And 1:1 in Controlled Rebates should be "10"
-	And Footnote text should be "Testing footnote"
+	And PB Footnote text should be "Testing footnote"
 	And Effective date should be current date
 	And Status is "New"
 

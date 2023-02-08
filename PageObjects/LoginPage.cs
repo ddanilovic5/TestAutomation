@@ -37,7 +37,7 @@ namespace PageObjects
                     email = "cons@ascentrebateportal.com";
                     break;
                 case "MFG":
-                    email = "manufacturera@ascentrebateportal.com";
+                    email = "manufactureraa@ascentrebateportal.com";
                     break;
             }
 

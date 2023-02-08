@@ -21,7 +21,7 @@ namespace PageObjects
         private IWebElement PrefferedBrandRatesSection => Driver.Instance.FindElement(By.XPath("//div[@id='preferredBrandRatesTitle']/.."));
         private IWebElement PBFSection => Driver.Instance.FindElement(By.XPath("//div[@id='preferredBrandFootnotesTitle']/.."));
         private IWebElement NonPreferredBrandRatesSection => Driver.Instance.FindElement(By.XPath("//div[@id='nonPreferredBrandRatesTitle']/.."));
-        private IWebElement NPBFSection => Driver.Instance.FindElement(By.XPath("//div[@id='nonPreferredBrandFootnotesTitle']/.."));
+        private IWebElement NonPBFSection => Driver.Instance.FindElement(By.XPath("//div[@id='nonPreferredBrandFootnotesTitle']/.."));
         private IWebElement ProductDropdown => ProductDetailsSection.FindElement(By.CssSelector("[formcontrolname='productId']"));
         private ReadOnlyCollection<IWebElement> ProductList => ProductDropdown.FindElements(By.TagName("option"));
         private IWebElement CPCLabel => ProductDetailsSection.FindElement(By.XPath("//span[text() = 'CPC']"));
@@ -41,18 +41,19 @@ namespace PageObjects
         private By AccessRestrictedBidLocator => By.XPath("//*[@class='row mb-4']//*[text()='Access Restricted']//.. /.. / ..//input");
         private IWebElement AccessRestrictedBid => NonPreferredBrandRatesSection.FindElement(AccessRestrictedBidLocator);
         private IWebElement AccessRestrictedBidInput => Driver.Instance.FindElement(By.CssSelector("[formcontrolname='nonPreferredFormularyAccessRateRestricted']"));
-        private IWebElement AddNewNPBFButton => NPBFSection.FindElement(By.CssSelector("[type='button']"));
-        private IWebElement NPBFParticipantsDropdown => NPBFSection.FindElement(By.CssSelector("[class='dropdown-btn']"));
-        private ReadOnlyCollection<IWebElement> NPBFParticipantValues => NPBFSection.FindElements(By.CssSelector(".dropdown-list .multiselect-item-checkbox"));
-        private IWebElement NPBFSaveButton => PBFSection.FindElement(By.CssSelector("[type='submit']"));
+        private IWebElement AddNewNPBFButton => NonPBFSection.FindElement(By.CssSelector("[type='button']"));
+        private IWebElement NonPBFParticipantsDropdown => NonPBFSection.FindElement(By.CssSelector("[class='dropdown-btn']"));
+        private ReadOnlyCollection<IWebElement> NonPBFParticipantValues => NonPBFSection.FindElements(By.CssSelector(".dropdown-list .multiselect-item-checkbox"));
+        private IWebElement NonPBFSaveButton => NonPBFSection.FindElement(By.CssSelector("[type='submit']"));
         private IWebElement CreatePOButtom => Driver.Instance.FindElement(By.CssSelector(".modal-footer .btn-primary"));
-        private IWebElement NPBFTextarea => NPBFSection.FindElement(By.CssSelector(".fr-element"));
+        private IWebElement NonPBFTextarea => NonPBFSection.FindElement(By.CssSelector(".fr-element"));
 
 
         #region Methods
         public List<IWebElement> FetchAllProducts()
         {
             List<IWebElement> products = new List<IWebElement>();
+            Driver.Wait(3, () => ProductList.Count != 0);
 
             foreach (var product in ProductList)
             {
@@ -180,39 +181,38 @@ namespace PageObjects
             AccessRestrictedBidInput.SendKeys(percentageValue);
         }
 
-        public void TypeNPBFText(string text)
+        public void TypeNonPBFText(string text)
         {
             Driver.Wait(3, () => AddNewNPBFButton.Displayed);
             AddNewNPBFButton.Click();
             Driver.Wait(3, () => PBFTextarea.Displayed);
 
-            NPBFTextarea.Click();
-            NPBFTextarea.Clear();
-            NPBFTextarea.SendKeys(text);
+            NonPBFTextarea.Click();
+            NonPBFTextarea.Clear();
+            NonPBFTextarea.SendKeys(text);
         }
 
-        public void AddNPBFParticipant(string participantName)
+        public void AddNonPBFParticipant(string participantName)
         {
-            Driver.Wait(3, () => NPBFParticipantsDropdown.Displayed);
+            Driver.Wait(3, () => NonPBFParticipantsDropdown.Displayed);
 
-            NPBFParticipantsDropdown.Click();
-            IWebElement participant = NPBFParticipantValues.FirstOrDefault(x => x.Text.Trim() == participantName);
+            NonPBFParticipantsDropdown.Click();
+            IWebElement participant = NonPBFParticipantValues.FirstOrDefault(x => x.Text.Trim() == participantName);
             if (participant == null)
                 throw new NoSuchElementException($"NPBF Participant with name: \"{participantName}\" was not found.");
 
             participant.Click();
-            IWebElement selectedItem = NPBFParticipantsDropdown.FindElement(DropdownSelectedValuesLocator);
-            NPBFSection.Click(); // to remove dropdown
+            IWebElement selectedItem = NonPBFParticipantsDropdown.FindElement(DropdownSelectedValuesLocator);
+            NonPBFSection.Click(); // to remove dropdown
 
             if (!selectedItem.Text.Contains(participantName))
                 throw new Exception($"NPBF Participant - \"{participantName}\" was not selected.");
-
         }
 
-        public void SaveNPBF()
+        public void SaveNonPBF()
         {
-            Driver.Wait(3, () => NPBFSaveButton.Displayed);
-            NPBFSaveButton.Click();
+            Driver.Wait(3, () => NonPBFSaveButton.Displayed);
+            NonPBFSaveButton.Click();
         }
 
         public void ClickOnCreatePO()
