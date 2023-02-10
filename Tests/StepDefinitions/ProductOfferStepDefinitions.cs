@@ -1,28 +1,34 @@
 ﻿using PageObjects;
 using TechTalk.SpecFlow;
 using FluentAssertions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Tests.StepDefinitions
 {
     [Binding]
     public sealed class ProductOfferStepDefinitions
     {
-        private string _matrixName = "TA_Matrix";
-        private string _manufacturerName = "Manufacturer A";
-        private string _productName = "TA_Product";
-        private string _pbfText = "Testing PB footnote " + Guid.NewGuid().ToString();
-        private string _npbfText = "NPB Footnote " + Guid.NewGuid().ToString();
-
         private LoginPage _loginPage;
         private MatrixPage _matrixPage;
         private ProductOfferPage _poPage;
         private CreateProductOfferDialog _poDialog;
 
-        [Given(@"I create unique matrix")]
-        public void GivenICreateUniqueMatrix()
+        private string _matrixName = "TA_Matrix";
+        private string _manufacturerName = "Manufacturer A";
+        internal string productName = "TA_Product";
+        private string _pbfText = "Testing PB footnote " + Guid.NewGuid().ToString();
+        private string _npbfText = "NPB Footnote " + Guid.NewGuid().ToString();
+
+        public ProductOfferStepDefinitions(LoginPage loginpage, MatrixPage matrixPage, ProductOfferPage poPage, CreateProductOfferDialog poDialog)
         {
-            _loginPage = new LoginPage();
+            _loginPage = loginpage;
+            _matrixPage = matrixPage;
+            _poPage = poPage;
+            _poDialog = poDialog;
+        }
+
+        [Given(@"Unique matrix is created")]
+        public void UniqueMatrixIsCreated(bool signOut = true)
+        {
             _loginPage.SignInAs("Admin");
 
             _matrixPage = new MatrixPage();
@@ -31,7 +37,10 @@ namespace Tests.StepDefinitions
             _matrixPage.SelectManufacturer(_manufacturerName);
             _matrixPage.SaveNewMatrixClick();
 
-            _matrixPage.navigationBar.SignOut();
+            if(signOut) // this is needed for ProductOfferFlows steps, so Admin user doesn't need to signout after creating matrix and before creating PO.
+            {
+                _matrixPage.navigationBar.SignOut();
+            }
         }
 
         [Given(@"'([^']*)' is logged in")]
@@ -45,14 +54,12 @@ namespace Tests.StepDefinitions
         {
             _matrixPage.OpenMatrixDetails(_matrixName);
 
-            _poPage = new ProductOfferPage();
             _poPage.CreatePOButtonClick();
         }
 
         [Given(@"I select Product called ""([^""]*)""")]
         public void GivenISelectProductCalled(string productName)
         {
-            _poDialog = new CreateProductOfferDialog();
             _poDialog.SelectProduct(productName);
         }
 
@@ -70,9 +77,9 @@ namespace Tests.StepDefinitions
         }
 
         [Given(@"Participant assignment is ""([^""]*)""")]
-        public void GivenParticipantAssignmentIs(string humana)
+        public void GivenParticipantAssignmentIs(string participant)
         {
-            _poDialog.AssignParticipants(humana);
+            _poDialog.AssignParticipants(participant);
         }
 
         [Given(@"Primary Rate type is ""([^""]*)""")]
@@ -82,7 +89,7 @@ namespace Tests.StepDefinitions
         }
 
         [Given(@"Controlled (.*) has Bid with value of (.*)%")]
-        public void GivenHasBidWithValueOf(string p0, int bidValue)
+        public void GivenHasBidWithValueOf(string ration, int bidValue)
         {
             _poDialog.ControlledBid(bidValue.ToString());
         }
@@ -90,12 +97,10 @@ namespace Tests.StepDefinitions
         [Given(@"Add unique PB Footnote with ""([^""]*)"" participants")]
         public void GivenAddUniquePBFootnoteWithParticipants(string participants)
         {
-
             _poDialog.TypePBFText(_pbfText);
             _poDialog.AddPBFParticipant(participants);
             _poDialog.SavePBF();
         }
-
 
         [Given(@"NPB Rate has bid of (.*)% for Access Restricted")]
         public void GivenNPBRateHasBidOfForAccessRestricted(int bidValue)
@@ -103,25 +108,12 @@ namespace Tests.StepDefinitions
             _poDialog.NPBRatesBid(bidValue.ToString());
         }
 
-        [Given(@"NPB Footnote text is ""([^""]*)"" with ""([^""]*)""")]
-        public void GivenNPBFootnoteTextIsWithAllParticipants()
-        {
-        }
-
         [Given(@"Add unique NPB Footnote for ""([^""]*)""")]
         public void GivenAddUniqueNPBFootnoteFor(string participants)
         {
-
             _poDialog.TypeNonPBFText(_npbfText);
             _poDialog.AddNonPBFParticipant(participants);
             _poDialog.SaveNonPBF();
-        }
-
-
-        [Given(@"Product Offer is already created")]
-        public void GivenProductOfferIsAlreadyCreated()
-        {
-            throw new PendingStepException();
         }
 
         [When(@"I create Product Offer")]
@@ -139,7 +131,7 @@ namespace Tests.StepDefinitions
         [Then(@"New Product Offer is shown in the list")]
         public void ThenNewProductOfferIsShownInTheList()
         {
-            _poPage.VerifyProductIsInTheList(_productName).Should().BeTrue($"Previously created product - {_productName} is not shown in the product list.");
+            _poPage.VerifyProductIsInTheList(productName).Should().BeTrue($"Previously created product - {productName} is not shown in the product list.");
         }
 
         [Then(@"Primary Rate type should be ""([^""]*)""")]

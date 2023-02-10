@@ -16,14 +16,17 @@ namespace PageObjects
         {
             try
             {
-                GoTo();
-
+                if(Driver.Instance.Url != _url) 
+                {
+                    GoTo();
+                }
             }
             catch (Exception)
             {
 
                 throw new Exception($"Page with url {_url} was not loaded.");
             }
+
             Driver.Wait(30, () => Driver.Instance.FindElementsNoWait(By.ClassName("auth-form--subtitle")).Count != 0);
 
             string email = "";

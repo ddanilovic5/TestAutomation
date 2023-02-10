@@ -9,7 +9,7 @@ I want to be able to successfully set these data in create Product Offer form
 
 @DeleteMatrix
 Scenario Outline: Create new Product Offer with different user roles NEG/CS/MFG
-	Given I create unique matrix
+	Given Unique matrix is created
 	And '<User>' is logged in
 	And I start to create new Product Offer
 	And I select Product called "TA_Product"
@@ -36,3 +36,4 @@ Scenario Outline: Create new Product Offer with different user roles NEG/CS/MFG
 	| Neg  |
 	| CS   |
 	| MFG  |
+

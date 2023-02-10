@@ -96,6 +96,8 @@ namespace PageObjects
 
         public bool VerifyProductIsInTheList(string productName)
         {
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(By.CssSelector("[ref='leftContainer']")).Count != 0);
+
             GetProductRow(productName); // set row value for other methods
 
             return Products.FirstOrDefault(x => x.Text.Trim() == productName) != null;
