@@ -1,50 +1,56 @@
 ﻿using PageObjects;
 using TechTalk.SpecFlow;
 using FluentAssertions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Tests.StepDefinitions
 {
     [Binding]
     public sealed class ProductOfferStepDefinitions
     {
-        private string _matrixName;
-        private string _manufacturerName;
+        private string _matrixName = "TA_Matrix";
+        private string _manufacturerName = "Manufacturer A";
+        private string _productName = "TA_Product";
+        private string _pbfText = "Testing PB footnote " + Guid.NewGuid().ToString();
+        private string _npbfText = "NPB Footnote " + Guid.NewGuid().ToString();
+
         private LoginPage _loginPage;
         private MatrixPage _matrixPage;
         private ProductOfferPage _poPage;
         private CreateProductOfferDialog _poDialog;
 
-        [Given(@"Matrix called ""([^""]*)"" is already created")]
-        public void GivenMatrixCalledIsAlreadyCreated(string testingMatrix)
+        [Given(@"I create unique matrix")]
+        public void GivenICreateUniqueMatrix()
         {
-            _matrixName = testingMatrix;
-        }
+            _loginPage = new LoginPage();
+            _loginPage.SignInAs("Admin");
 
-        [Given(@"Matrix's manufacturer is ""([^""]*)""")]
-        public void GivenMatrixsManufacturerIs(string manufacturerName)
-        {
-            _manufacturerName = manufacturerName;
+            _matrixPage = new MatrixPage();
+            _matrixPage.ClickOnCreateNewMatrixButton();
+            _matrixPage.TypeMatrixName(_matrixName);
+            _matrixPage.SelectManufacturer(_manufacturerName);
+            _matrixPage.SaveNewMatrixClick();
+
+            _matrixPage.navigationBar.SignOut();
         }
 
         [Given(@"'([^']*)' is logged in")]
         public void GivenIsLoggedIn(string user)
         {
-            _loginPage = new LoginPage();
             _loginPage.SignInAs(user);
         }
 
-        [Given(@"User clicks on Create Product Offer button")]
-        public void GivenUserClicksOnCreateProductOfferButton()
+        [Given(@"I start to create new Product Offer")]
+        public void GivenIStartToCreateNewProductOffer()
         {
-            _matrixPage = new MatrixPage();
             _matrixPage.OpenMatrixDetails(_matrixName);
-             
-            _poPage= new ProductOfferPage();
+
+            _poPage = new ProductOfferPage();
             _poPage.CreatePOButtonClick();
         }
 
-        [Given(@"Selects Product called ""([^""]*)""")]
-        public void GivenSelectsProductCalled(string productName)
+        [Given(@"I select Product called ""([^""]*)""")]
+        public void GivenISelectProductCalled(string productName)
         {
             _poDialog = new CreateProductOfferDialog();
             _poDialog.SelectProduct(productName);
@@ -75,19 +81,21 @@ namespace Tests.StepDefinitions
             _poDialog.SelectPrimaryRateType(primaryRate);
         }
 
-        [Given(@"(.*) has Bid with value of (.*)%")]
+        [Given(@"Controlled (.*) has Bid with value of (.*)%")]
         public void GivenHasBidWithValueOf(string p0, int bidValue)
         {
             _poDialog.ControlledBid(bidValue.ToString());
         }
 
-        [Given(@"PB Footnote text is ""([^""]*)"" with ""([^""]*)"" participants")]
-        public void GivenPBFootnoteTextIsWithParticipants(string pbfText, string participants)
+        [Given(@"Add unique PB Footnote with ""([^""]*)"" participants")]
+        public void GivenAddUniquePBFootnoteWithParticipants(string participants)
         {
-            _poDialog.TypePBFText(pbfText);
+
+            _poDialog.TypePBFText(_pbfText);
             _poDialog.AddPBFParticipant(participants);
             _poDialog.SavePBF();
         }
+
 
         [Given(@"NPB Rate has bid of (.*)% for Access Restricted")]
         public void GivenNPBRateHasBidOfForAccessRestricted(int bidValue)
@@ -96,12 +104,19 @@ namespace Tests.StepDefinitions
         }
 
         [Given(@"NPB Footnote text is ""([^""]*)"" with ""([^""]*)""")]
-        public void GivenNPBFootnoteTextIsWithAllParticipants(string npbfText, string participants)
+        public void GivenNPBFootnoteTextIsWithAllParticipants()
         {
-            _poDialog.TypeNonPBFText(npbfText);
+        }
+
+        [Given(@"Add unique NPB Footnote for ""([^""]*)""")]
+        public void GivenAddUniqueNPBFootnoteFor(string participants)
+        {
+
+            _poDialog.TypeNonPBFText(_npbfText);
             _poDialog.AddNonPBFParticipant(participants);
             _poDialog.SaveNonPBF();
         }
+
 
         [Given(@"Product Offer is already created")]
         public void GivenProductOfferIsAlreadyCreated()
@@ -115,17 +130,16 @@ namespace Tests.StepDefinitions
             _poDialog.ClickOnCreatePO();
         }
 
-        [Then(@"Succesfully added dialog is shown")]
-        public void ThenSuccesfullyAddedDialogIsShown()
+        [Then(@"Success message is shown")]
+        public void ThenSuccessMessageIsShown()
         {
             _poPage.VerifySuccessMessage().Should().BeTrue("Success Message didn't appear after PO creation.");
         }
 
-
-        [Then(@"New Product Offer is shown in the list with the name ""([^""]*)""")]
-        public void ThenNewProductOfferIsShownInTheListWithTheName(string productName)
+        [Then(@"New Product Offer is shown in the list")]
+        public void ThenNewProductOfferIsShownInTheList()
         {
-            _poPage.VerifyProductIsInTheList(productName).Should().BeTrue($"Previously created product - {productName} is not shown in the product list.");
+            _poPage.VerifyProductIsInTheList(_productName).Should().BeTrue($"Previously created product - {_productName} is not shown in the product list.");
         }
 
         [Then(@"Primary Rate type should be ""([^""]*)""")]
@@ -146,11 +160,23 @@ namespace Tests.StepDefinitions
             _poPage.VerifyControlledRebates(ratio, value).Should().BeTrue($"Controlled rebate {ratio} doesn't have expected value of {value}");
         }
 
-        [Then(@"PB Footnote text should be ""([^""]*)""")]
-        public void ThenPBFootnoteTextShouldBe(string text)
+        [Then(@"Restricted NP Brand Rates should be ""([^""]*)""")]
+        public void ThenRestrictedNPBrandRatesShouldBe(string value)
+        {
+            _poPage.VerifyRestrictedNPBRate(value).Should().BeTrue($"Restricted NPB value is not as expected. Expected to be: {value}");
+        }
+
+        [Then(@"PB Footnote text should be adequate")]
+        public void ThenPBFootnoteTextShouldBeAdequate()
         {
             _poPage.ViewFootnotesButtonClick();
-            _poPage.VerifyFootnotePresent(text).Should().BeTrue($"Footnote with text - '{text}' is not present.");
+            _poPage.VerifyFootnotePresent(_pbfText).Should().BeTrue($"PB Footnote with text - '{_pbfText}' is not present.");
+        }
+
+        [Then(@"NPB Footnote text should be adequate")]
+        public void ThenNPBFootnoteTextShouldBeAdequate()
+        {
+            _poPage.VerifyFootnotePresent(_npbfText).Should().BeTrue($"Non PB Footnote with text - '{_npbfText}' is not present.");
             _poPage.CloseFootnoteButtonClick();
         }
 
@@ -165,27 +191,5 @@ namespace Tests.StepDefinitions
         {
             _poPage.VerifyPOStatus(status).Should().BeTrue($"Product Offer status is not as expected. Expected to be - {status}");
         }
-
-
-        // =================================================
-
-        [Then(@"""([^""]*)"" message is shown under the Effective date")]
-        public void ThenMessageIsShownUnderTheEffectiveDate(string p0)
-        {
-            throw new PendingStepException();
-        }
-
-        [Then(@"""([^""]*)"" message is shown under the Ascent rates participants")]
-        public void ThenMessageIsShownUnderTheAscentRatesParticipants(string p0)
-        {
-            throw new PendingStepException();
-        }
-
-        [Then(@"""([^""]*)"" message is shown under the Primary Rates type")]
-        public void ThenMessageIsShownUnderThePrimaryRatesType(string p0)
-        {
-            throw new PendingStepException();
-        }
-
     }
 }

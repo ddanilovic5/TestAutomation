@@ -14,7 +14,7 @@ namespace Tests
             Driver.InitializeDriver();
         }
 
-        [AfterScenario]
+        [AfterScenario(Order = 2)]
         public void TestCleanUp()
         {
             if(!TestCompletedWithoutErrors())

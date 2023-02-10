@@ -30,6 +30,10 @@ namespace PageObjects
 
             switch (username)
             {
+                case "Admin":
+                    email = "ascent.matrix.admin@email.com";
+                    password = "Test123!";
+                    break;
                 case "Neg":
                     email = "nega@ascentrebateportal.com";
                     break;
