@@ -8,14 +8,20 @@ namespace PageObjects
 {
     public class ProductOfferPage
     {
+        public NavigationBar navigationBar;
+        public ProductOfferPage()
+        {
+            this.navigationBar = new NavigationBar();
+        }
+
         private const string _url = "/product-offers";
         private string _productRowLocator = "[row-index='{0}']";
         private string _productNameLocator = "//*[text()='{0}']/../../..";
         public void GoTo() => Driver.Instance.Navigate().GoToUrl(_url);
 
         private By CreatePOButtonLocator => By.CssSelector(".product-offer-row .btn-primary");
-        private By NewOfferPopupLocator => By.CssSelector("div.swal2-popup");
-        private By SuccessMessageLocator => By.Id("swal2-title");
+        private By PopupLocator => By.CssSelector("div.swal2-popup");
+        private By PopupMessageLocator => By.Id("swal2-title");
         private By PrimaryRateLocator => By.CssSelector("[col-id='rateTypePrimary']");
         private By CPCLocator => By.CssSelector("[col-id='cpc']");
         private By Controled1M => By.CssSelector("[col-id='controlled1OfMany']");
@@ -27,16 +33,19 @@ namespace PageObjects
         private By RestrictedBid => By.CssSelector("[col-id='nonPreferredFormularyAccessRateRestricted']");
         private By EffectiveStartDateLocator => By.CssSelector("[col-id='effectiveStartDate']");
         private By POStatusLocator => By.CssSelector("[col-id='status']");
+        private By ProductDropdownLocator => By.CssSelector("[class='dropdown-menu show']");
+        private By SendToAscentButtonLocator => By.XPath("//a[text()='Send to Ascent']");
 
         private IWebElement CreatePOButton => Driver.Instance.FindElement(CreatePOButtonLocator);
         private IWebElement ConfirmPopupButton => Driver.Instance.FindElement(By.CssSelector(".swal2-actions .swal2-confirm"));
-        private IWebElement SuccessMessage => Driver.Instance.FindElement(SuccessMessageLocator);
+        private IWebElement PopupMessage => Driver.Instance.FindElement(PopupMessageLocator);
         private ReadOnlyCollection<IWebElement> Products => Driver.Instance.FindElements(By.CssSelector("[col-id='productOfferProduct']"));
         private IWebElement PrimaryRate => Driver.Instance.FindElement(PrimaryRateLocator);
         private IWebElement ViewFootnotesButton => Driver.Instance.FindElement(By.XPath("//*[text()=' View  Footnotes ']")); //consider adding ID
         private IWebElement FootnoteModalWindow => Driver.Instance.FindElement(By.TagName("ngb-modal-window"));
         private ReadOnlyCollection<IWebElement> AllFootnotes => Driver.Instance.FindElements(By.CssSelector(".product-offer-footnote-detail-wrapper--content"));
         private IWebElement CloseFootnoteButton => Driver.Instance.FindElement(By.CssSelector(".btn-close"));
+        private IWebElement Status => Driver.Instance.FindElement(By.CssSelector("[col-id='status']"));
 
 
         #region Methods
@@ -47,7 +56,7 @@ namespace PageObjects
 
             CreatePOButton.Click();
 
-            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(NewOfferPopupLocator).Count != 0);
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(PopupLocator).Count != 0);
             ConfirmPopupButton.Click();
 
             Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".modal-body--product-offer")).Count != 0);
@@ -83,15 +92,35 @@ namespace PageObjects
             _productRowLocator = string.Format(_productRowLocator, row); // set value for the product row
         }
 
+        public void SendToAscentAction()
+        {
+            IWebElement productDropdown = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[2];
+            productDropdown.Click();
+
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(ProductDropdownLocator).Count != 0);
+
+            productDropdown.FindElement(SendToAscentButtonLocator).Click();
+
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(PopupLocator).Count != 0);
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(PopupMessageLocator).Count != 0);
+        }
+
         #endregion
 
         #region Verification
 
         public bool VerifySuccessMessage()
         {
-            Driver.Wait(3, ()=> Driver.Instance.FindElementsNoWait(SuccessMessageLocator).Count != 0);
+            Driver.Wait(3, ()=> Driver.Instance.FindElementsNoWait(PopupMessageLocator).Count != 0);
 
-            return SuccessMessage != null;
+            return PopupMessage != null;
+        }
+
+        public bool VerifyPopupMessageByText(string messageText)
+        {
+            string popupMessage = PopupMessage.Text.Trim();
+
+            return popupMessage.Contains(messageText);
         }
 
         public bool VerifyProductIsInTheList(string productName)

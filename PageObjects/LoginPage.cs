@@ -48,9 +48,14 @@ namespace PageObjects
                     break;
             }
 
+            Driver.Wait(TimeSpan.FromSeconds(1));
+
             EmailField.Click();
+            EmailField.Clear();
             EmailField.SendKeys(email);
+
             PasswordField.Click();
+            PasswordField.Clear();
             PasswordField.SendKeys(password);
             SignInButton.Click();
 

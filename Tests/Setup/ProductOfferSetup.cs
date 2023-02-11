@@ -16,8 +16,7 @@ namespace Tests.Setup
 
         [AfterScenario("@DeleteMatrix", Order = 1)]
         public void DeleteMatrix()
-        {
-
+        { 
             loginPage.SignInAs("Admin");
             matrixPage.SearchForMatrix("TA_Matrix");
             matrixPage.DeleteMatrix();

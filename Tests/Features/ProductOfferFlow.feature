@@ -3,6 +3,7 @@ In order to present the main flow of a Product Offer
 As a manufacturer and negotiator
 I want to be able to create it, send it to Ascent, review it and finally send to an approval
 
+@DeleteMatrix
 Scenario Outline: Send created Product Offer for negotiation
 	Given Unique matrix is created with a new product offer in it
 	And '<User>' is logged in
@@ -10,6 +11,6 @@ Scenario Outline: Send created Product Offer for negotiation
 	Then I will get confirmation that sending is successful
 	And 'Neg' will see sent product offer on his dashboard 'Assigned to me for negotiation'
 Examples:
-	| user |
+	| User |
 	| MFG  |
 	| Neg  |
