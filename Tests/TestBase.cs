@@ -27,7 +27,7 @@ namespace Tests
 
         private void TakeScreenshot()
         {
-            var screenshot = Driver.TakeScreenshot(TestContext.CurrentContext.Test.Name);
+            var screenshot = Driver.TakeScreenshot(TestContext.CurrentContext.Test.Name.Trim('('));
             if (screenshot != null) TestContext.AddTestAttachment(screenshot);
         }
 

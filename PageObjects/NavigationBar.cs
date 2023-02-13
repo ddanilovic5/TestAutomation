@@ -27,6 +27,7 @@ namespace PageObjects
         public void SignOut()
         {
             Driver.Wait(TimeSpan.FromSeconds(1));
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".swal2-container")).Count == 0);
 
             ProfilePicture.Click();
             Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".avatar-user-info")).Count != 0);

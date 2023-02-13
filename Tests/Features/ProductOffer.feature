@@ -3,14 +3,10 @@ In order to be able to have Product Offer with certain data
 As a manufacturer, negotiator and contract specialist
 I want to be able to successfully set these data in create Product Offer form
 
-#Background: 
-#	Given Matrix called "TestingMatrix" is already created
-#	And Matrix's manufacturer is "Manufacturer A"
-
 @DeleteMatrix
 Scenario Outline: Create new Product Offer with different user roles NEG/CS/MFG
 	Given Unique matrix is created
-	And '<User>' is logged in
+	And I login as user '<User>'
 	And I start to create new Product Offer
 	And I select Product called "TA_Product"
 	And Effective date is current date

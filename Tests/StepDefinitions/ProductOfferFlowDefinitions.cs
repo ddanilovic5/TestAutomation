@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using FluentAssertions;
+using NUnit.Framework;
 using PageObjects;
 using System;
 using System.Collections.Generic;
@@ -12,29 +13,29 @@ namespace Tests.StepDefinitions
     [Binding]
     public class ProductOfferFlowDefinitions
     {
-        private readonly ProductOfferStepDefinitions _poSteps;
-        private readonly MatrixPage _matrixPage;
-        private readonly ProductOfferPage _poPage;
-        private readonly LoginPage _loginPage;
-        private readonly DashboardPage _dashboardPage;
+        private ProductOfferStepDefinitions _poSteps;
+        private MatrixPage _matrixPage;
+        private ProductOfferPage _poPage;
+        private LoginPage _loginPage;
+        private DashboardPage _dashboardPage;
+        private CommonData _commonData;
 
-        private string _matrixName = "TA_Matrix";
         private string _popupMessage = "Send to Ascent was successful!";
-        public ProductOfferFlowDefinitions(ProductOfferStepDefinitions poSteps, MatrixPage matrixPage, ProductOfferPage poPage, LoginPage loginPage, DashboardPage dashboardPage)
+        public ProductOfferFlowDefinitions(ProductOfferStepDefinitions poSteps, MatrixPage matrixPage, ProductOfferPage poPage, LoginPage loginPage, DashboardPage dashboardPage, CommonData commonData)
         {
             _poSteps= poSteps;
             _matrixPage = matrixPage;
             _poPage = poPage;
             _loginPage = loginPage;
             _dashboardPage = dashboardPage;
+            _commonData = commonData;
         }
 
-        [Given(@"Unique matrix is created with a new product offer in it")]
-        public void GivenUniqueMatrixIsCreatedWithANewProductOfferInIt()
+        [Given(@"I create New Product Offer")]
+        public void GivenICreateNewProductOffer()
         {
-            _poSteps.UniqueMatrixIsCreated(false);
             _poSteps.GivenIStartToCreateNewProductOffer();
-            _poSteps.GivenISelectProductCalled(_poSteps.productName);
+            _poSteps.GivenISelectProductCalled(_commonData.ProductName);
             _poSteps.GivenEffectiveDateIsCurrentDate();
             _poSteps.GivenParticipantAssignmentIs("Humana");
             _poSteps.GivenPrimaryRateTypeIs("Base Rebate");
@@ -42,37 +43,63 @@ namespace Tests.StepDefinitions
             _poSteps.GivenAddUniquePBFootnoteWithParticipants("Humana");
             _poSteps.WhenICreateProductOffer();
             _poSteps.ThenNewProductOfferIsShownInTheList();
-
-            _poPage.navigationBar.SignOut();
         }
 
         [When(@"I send created product offer to Ascent for negotiation")]
         public void WhenISendCreatedProductOfferToAscentForNegotiation()
         {
-            // open matrix then click on three dots
-            _matrixPage.OpenMatrixDetails(_matrixName);
             _poPage.SendToAscentAction();
         }
 
         [Then(@"I will get confirmation that sending is successful")]
         public void ThenIWillGetConfirmationThatSendingIsSuccessful()
         {
-            Assert.IsTrue(_poPage.VerifyPopupMessageByText(_popupMessage), $"Confirmation message with text '{_popupMessage}' didn't appear!");
+            _poPage.VerifySuccessPopup().Should().NotBeNull("because successful confirmation popup should appear after sending");
+        }
+
+        [Then(@"Status of that product offer will be '([^']*)'")]
+        public void ThenStatusOfThatProductOfferWillBe(string status)
+        {
+            Assert.IsTrue(_poPage.VerifyPOStatus(status), $"PO Status was not as expected. Expected was {status}");
         }
 
         [Then(@"'([^']*)' will see sent product offer on his dashboard '([^']*)'")]
-        public void ThenWillSeeSentProductOfferOnHisDashboard(string user, string p1)
+        public void ThenWillSeeSentProductOfferOnHisDashboard(string user, string accordion)
         {
             _poPage.navigationBar.SignOut();
 
             _loginPage.SignInAs(user);
             _matrixPage.navigationBar.DashboardButtonClick();
 
+            if (accordion == "Assigned to Ascent")
+            {
+                _dashboardPage.AssignedToMeClick();
+                _dashboardPage.AssignedToAscentClick();
+            }
 
-            Assert.IsTrue(_dashboardPage.VerifySentProductOfferListed(_matrixName, "Manufacturer A"), $"Product offer for {_matrixName} is not listed for negotiation!");
+            Assert.IsTrue(_dashboardPage.VerifySentProductOfferListed(_commonData.MatrixName, "Manufacturer A"), $"Product offer for {_commonData.MatrixName} is not listed for negotiation!");
+        }
 
-            // TODO
-            // Product Offer status will be in Review
+        // --------------------------- TC2 ---------------------------
+
+        [Given(@"I send created product offer to Ascent for negotiation")]
+        public void GivenISendCreatedProductOfferToAscentForNegotiation()
+        {
+            WhenISendCreatedProductOfferToAscentForNegotiation();
+        }
+
+        [Given(@"I prepare for sending created product for approval to '([^']*)'")]
+        public void GivenIPrepareForSendingCreatedProductForApprovalTo(string user)        
+        {
+            _matrixPage.OpenMatrixDetails(_commonData.MatrixName);
+            _poPage.SendForCSApprovalClick();
+            _poPage.SendSelectedToAscentAction(_commonData.ProductName);
+        }
+
+        [When(@"I send selected product offer for CS review")]
+        public void WhenISendSelectedProductOfferForCSReview()
+        {
+            _poPage.CSReviewButtonClick();
         }
     }
 }

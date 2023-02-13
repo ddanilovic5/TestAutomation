@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using SeleniumHelpers;
 using SeleniumHelpers.Extensions;
 using System.Collections.ObjectModel;
@@ -35,6 +36,9 @@ namespace PageObjects
         private By POStatusLocator => By.CssSelector("[col-id='status']");
         private By ProductDropdownLocator => By.CssSelector("[class='dropdown-menu show']");
         private By SendToAscentButtonLocator => By.XPath("//a[text()='Send to Ascent']");
+        private By SendForCSApprovalLocator => By.XPath("//*[text() =' Send for CS Approval ']");
+        private By SendSelectedToAscentLocator => By.XPath("//*[text() =' Send Selected to Ascent ']");
+        private By CheckForActionInputLocator => By.XPath("//*[@col-id='actionCheckbox']//input");
 
         private IWebElement CreatePOButton => Driver.Instance.FindElement(CreatePOButtonLocator);
         private IWebElement ConfirmPopupButton => Driver.Instance.FindElement(By.CssSelector(".swal2-actions .swal2-confirm"));
@@ -45,7 +49,9 @@ namespace PageObjects
         private IWebElement FootnoteModalWindow => Driver.Instance.FindElement(By.TagName("ngb-modal-window"));
         private ReadOnlyCollection<IWebElement> AllFootnotes => Driver.Instance.FindElements(By.CssSelector(".product-offer-footnote-detail-wrapper--content"));
         private IWebElement CloseFootnoteButton => Driver.Instance.FindElement(By.CssSelector(".btn-close"));
-        private IWebElement Status => Driver.Instance.FindElement(By.CssSelector("[col-id='status']"));
+        private IWebElement MultipleSelectButton => Driver.Instance.FindElement(By.CssSelector("[label='Multiple select']"));
+        private IWebElement SendForCSApprovalButton => Driver.Instance.FindElement(SendForCSApprovalLocator);
+        private IWebElement CSReviewSelectedButton => Driver.Instance.FindElement(By.XPath("//*[text() = ' CS Review Selected ']"));
 
 
         #region Methods
@@ -56,11 +62,14 @@ namespace PageObjects
 
             CreatePOButton.Click();
 
+            Driver.Wait(TimeSpan.FromSeconds(2));
             Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(PopupLocator).Count != 0);
             ConfirmPopupButton.Click();
 
             Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".modal-body--product-offer")).Count != 0);
             Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.ClassName("product-offer-section")).Count != 0);
+
+            Driver.Wait(TimeSpan.FromSeconds(2));
         }
 
         public void ViewFootnotesButtonClick()
@@ -94,6 +103,8 @@ namespace PageObjects
 
         public void SendToAscentAction()
         {
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(PopupLocator).Count == 0);
+
             IWebElement productDropdown = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[2];
             productDropdown.Click();
 
@@ -105,22 +116,63 @@ namespace PageObjects
             Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(PopupMessageLocator).Count != 0);
         }
 
+        public void MultipleSelectButtonHover()
+        {
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(By.ClassName("page-table-search")).Count != 0);
+
+            Actions actions = new Actions(Driver.Instance);
+            actions.MoveToElement(MultipleSelectButton).Perform();
+
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(By.ClassName("dropdown-content")).Count != 0);
+        }
+
+        public void SendForCSApprovalClick()
+        {
+            MultipleSelectButtonHover();
+            SendForCSApprovalButton.Click();
+
+            Driver.Wait(TimeSpan.FromSeconds(2));
+            Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(SendSelectedToAscentLocator).Count != 0);
+        }
+
+        public void SendSelectedToAscentAction(string productName)
+        {
+            GetProductRow(productName);
+
+            IWebElement productRow = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[1];
+            IWebElement checkBoxInput = productRow.FindElement(CheckForActionInputLocator);
+
+            if(checkBoxInput == null) 
+            {
+                throw new NoSuchElementException("Checkbox in column 'Send Selected To Ascent' was not found.");
+            }
+
+            checkBoxInput.Click();
+
+            Driver.Wait(TimeSpan.FromSeconds(1));
+        }
+
+        public void CSReviewButtonClick()
+        {
+            CSReviewSelectedButton.Click();
+        }
+
         #endregion
 
         #region Verification
 
-        public bool VerifySuccessMessage()
+        public IWebElement VerifySuccessPopup()
         {
             Driver.Wait(3, ()=> Driver.Instance.FindElementsNoWait(PopupMessageLocator).Count != 0);
 
-            return PopupMessage != null;
+            return PopupMessage;
         }
 
-        public bool VerifyPopupMessageByText(string messageText)
+        public string FetchPopupMessageByText()
         {
             string popupMessage = PopupMessage.Text.Trim();
 
-            return popupMessage.Contains(messageText);
+            return popupMessage;
         }
 
         public bool VerifyProductIsInTheList(string productName)
@@ -210,6 +262,9 @@ namespace PageObjects
 
         public bool VerifyPOStatus(string status)
         {
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(PopupLocator).Count == 0);
+            Driver.Wait(TimeSpan.FromSeconds(1));
+
             IWebElement productRow = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[1];
             IWebElement statusElement = productRow.FindElement(POStatusLocator);
 

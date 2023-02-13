@@ -11,40 +11,37 @@ namespace Tests.StepDefinitions
         private MatrixPage _matrixPage;
         private ProductOfferPage _poPage;
         private CreateProductOfferDialog _poDialog;
+        private CommonData _commonData;
 
-        private string _matrixName = "TA_Matrix";
-        private string _manufacturerName = "Manufacturer A";
-        internal string productName = "TA_Product";
         private string _pbfText = "Testing PB footnote " + Guid.NewGuid().ToString();
         private string _npbfText = "NPB Footnote " + Guid.NewGuid().ToString();
 
-        public ProductOfferStepDefinitions(LoginPage loginpage, MatrixPage matrixPage, ProductOfferPage poPage, CreateProductOfferDialog poDialog)
+        public ProductOfferStepDefinitions(LoginPage loginpage, MatrixPage matrixPage, ProductOfferPage poPage, CreateProductOfferDialog poDialog, CommonData commonData)
         {
             _loginPage = loginpage;
             _matrixPage = matrixPage;
             _poPage = poPage;
             _poDialog = poDialog;
+            _commonData = commonData;
         }
 
         [Given(@"Unique matrix is created")]
-        public void UniqueMatrixIsCreated(bool signOut = true)
+        public void UniqueMatrixIsCreated()
         {
             _loginPage.SignInAs("Admin");
+            _commonData.MatrixName += DateTime.UtcNow.ToString("dd/MM/yy HH:mm:ss");
 
             _matrixPage = new MatrixPage();
             _matrixPage.ClickOnCreateNewMatrixButton();
-            _matrixPage.TypeMatrixName(_matrixName);
-            _matrixPage.SelectManufacturer(_manufacturerName);
+            _matrixPage.TypeMatrixName(_commonData.MatrixName);
+            _matrixPage.SelectManufacturer(_commonData.ManufacturerName);
             _matrixPage.SaveNewMatrixClick();
 
-            if(signOut) // this is needed for ProductOfferFlows steps, so Admin user doesn't need to signout after creating matrix and before creating PO.
-            {
-                _matrixPage.navigationBar.SignOut();
-            }
+            _matrixPage.navigationBar.SignOut();
         }
 
-        [Given(@"'([^']*)' is logged in")]
-        public void GivenIsLoggedIn(string user)
+        [Given(@"I login as user '([^']*)'")]
+        public void GivenILoginAsUser(string user)
         {
             _loginPage.SignInAs(user);
         }
@@ -52,7 +49,7 @@ namespace Tests.StepDefinitions
         [Given(@"I start to create new Product Offer")]
         public void GivenIStartToCreateNewProductOffer()
         {
-            _matrixPage.OpenMatrixDetails(_matrixName);
+            _matrixPage.OpenMatrixDetails(_commonData.MatrixName);
 
             _poPage.CreatePOButtonClick();
         }
@@ -61,12 +58,6 @@ namespace Tests.StepDefinitions
         public void GivenISelectProductCalled(string productName)
         {
             _poDialog.SelectProduct(productName);
-        }
-
-        [Given(@"CPC is automatically filled with value ""([^""]*)""")]
-        public void GivenCPCIsAutomaticallyFilledWithValue(string cpcValue)
-        {
-            _poDialog.VerifyCPCHasValue(cpcValue).Should().BeTrue($"CPC value is not as expected. Expected value - {cpcValue}");
         }
 
         [Given(@"Effective date is current date")]
@@ -125,13 +116,13 @@ namespace Tests.StepDefinitions
         [Then(@"Success message is shown")]
         public void ThenSuccessMessageIsShown()
         {
-            _poPage.VerifySuccessMessage().Should().BeTrue("Success Message didn't appear after PO creation.");
+            _poPage.FetchPopupMessageByText().Should().Be("Successfully added123");
         }
 
         [Then(@"New Product Offer is shown in the list")]
         public void ThenNewProductOfferIsShownInTheList()
         {
-            _poPage.VerifyProductIsInTheList(productName).Should().BeTrue($"Previously created product - {productName} is not shown in the product list.");
+            _poPage.VerifyProductIsInTheList(_commonData.ProductName).Should().BeTrue($"Previously created product - {_commonData.ProductName} is not shown in the product list.");
         }
 
         [Then(@"Primary Rate type should be ""([^""]*)""")]

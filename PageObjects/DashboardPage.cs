@@ -11,11 +11,15 @@ namespace PageObjects
 {
     public class DashboardPage
     {
-        private By AssignedToMeForNegLocator => By.Id("ngb-panel-0-header");
+        private By AssignedToMeForNegLocator => By.XPath("//*[text() = 'Assigned to me for negotiation ']");
+        private By AssignedToAscentLocator => By.XPath("//*[text() = 'Assigned to Ascent ']");
+        private By AssignedToMeLocator => By.XPath("//*[text() = 'Assigned to me ']");
         private By LoaderLocator => By.CssSelector("[class='ag-overlay-loading-center']");
 
         private IWebElement AssignedToMeForNeg => Driver.Instance.FindElement(AssignedToMeForNegLocator);
-        private IReadOnlyCollection<IWebElement> AllProductOffersForNegotiation => Driver.Instance.FindElements(By.CssSelector("[ref='eValue']"));
+        private IWebElement AssignedToAscent => Driver.Instance.FindElement(AssignedToAscentLocator);
+        private IWebElement AssignedToMe => Driver.Instance.FindElement(AssignedToMeLocator);
+        private IReadOnlyCollection<IWebElement> AllAssignedProductOffers => Driver.Instance.FindElements(By.CssSelector("[ref='eValue']"));
 
         #region Methods
 
@@ -29,6 +33,26 @@ namespace PageObjects
             Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".ag-cell-wrapper")).Count != 0);
         }
 
+        public void AssignedToAscentClick()
+        {
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(AssignedToAscentLocator).Count != 0);
+
+            AssignedToAscent.Click();
+
+            Driver.Wait(15, () => Driver.Instance.FindElementsNoWait(LoaderLocator).Count == 0);
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".ag-cell-wrapper")).Count != 0);
+        }
+
+        public void AssignedToMeClick()
+        {
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(AssignedToMeLocator).Count != 0);
+
+            AssignedToMe.Click();
+
+            Driver.Wait(15, () => Driver.Instance.FindElementsNoWait(LoaderLocator).Count == 0);
+            Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(By.CssSelector(".ag-cell-wrapper")).Count != 0);
+
+        }
         #endregion
 
         #region Verifications
@@ -42,7 +66,7 @@ namespace PageObjects
             // TA_Matrix (Manufacturer A)
             string poName = $"{matrixName} ({manufacturerName})";
 
-            IWebElement productOffer = AllProductOffersForNegotiation.FirstOrDefault(x => x.Text.Trim().Contains(poName));
+            IWebElement productOffer = AllAssignedProductOffers.FirstOrDefault(x => x.Text.Trim().Contains(poName));
 
             if(productOffer == null) 
             {

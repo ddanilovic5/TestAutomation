@@ -67,15 +67,9 @@ namespace PageObjects
         public void SelectProduct(string productName)
         {
             Driver.Wait(3, () => ProductDropdown.Displayed);
-            ProductDropdown.Click();
 
-            IWebElement choosenProduct = FetchAllProducts().FirstOrDefault(x => x.Text.Trim() == productName);
-
-            if (choosenProduct == null)
-                throw new NoSuchElementException($"Product with name: \"{productName}\" was not found.");
-
-            choosenProduct.Click();
-            ProductDropdown.SendKeys(Keys.Enter);
+            SelectElement productDropdown = new SelectElement(ProductDropdown);
+            productDropdown.SelectByText(productName, true);
 
             Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(ValidDropdownSelectionLocator).Count != 0);
         }
