@@ -116,63 +116,59 @@ namespace Tests.StepDefinitions
         [Then(@"Success message is shown")]
         public void ThenSuccessMessageIsShown()
         {
-            _poPage.FetchPopupMessageByText().Should().Be("Successfully added123");
+            _poPage.FetchPopupMessage().Should().Be("Successfully added");
         }
 
         [Then(@"New Product Offer is shown in the list")]
         public void ThenNewProductOfferIsShownInTheList()
         {
-            _poPage.VerifyProductIsInTheList(_commonData.ProductName).Should().BeTrue($"Previously created product - {_commonData.ProductName} is not shown in the product list.");
+            _poPage.FetchProductList(_commonData.ProductName).Should().Contain(product => product.Text.Trim() == _commonData.ProductName);
         }
 
         [Then(@"Primary Rate type should be ""([^""]*)""")]
         public void ThenPrimaryRateTypeShouldBe(string primaryRate)
         {
-            _poPage.VerifyPrimaryRateTypes(primaryRate).Should().BeTrue($"Primary rate is not as expected. Expected to be - {primaryRate}");
+            _poPage.FetchPrimaryRateTypes().Should().Be(primaryRate);
         }
 
         [Then(@"CPC should be ""([^""]*)""")]
-        public void ThenCPCShouldBe(string cpc)
+        public void ThenCPCShouldBe(string cpcValue)
         {
-            _poPage.VerifyCPC(cpc).Should().BeTrue($"CPC value is not as expected. Expected to be - {cpc}");
+            _poPage.FetchCPC().Should().Be(cpcValue);
         }
 
         [Then(@"(.*) in Controlled Rebates should be ""([^""]*)""")]
         public void ThenInControlledRebatesShouldBe(string ratio, string value)
         {
-            _poPage.VerifyControlledRebates(ratio, value).Should().BeTrue($"Controlled rebate {ratio} doesn't have expected value of {value}");
+            _poPage.FetchControlledRebates(ratio).Should().Contain(value);
         }
 
         [Then(@"Restricted NP Brand Rates should be ""([^""]*)""")]
         public void ThenRestrictedNPBrandRatesShouldBe(string value)
         {
-            _poPage.VerifyRestrictedNPBRate(value).Should().BeTrue($"Restricted NPB value is not as expected. Expected to be: {value}");
+            _poPage.FetchRestrictedNPBRate(value).Should().Contain(value);
         }
 
         [Then(@"PB Footnote text should be adequate")]
         public void ThenPBFootnoteTextShouldBeAdequate()
         {
             _poPage.ViewFootnotesButtonClick();
-            _poPage.VerifyFootnotePresent(_pbfText).Should().BeTrue($"PB Footnote with text - '{_pbfText}' is not present.");
+            _poPage.FetchAllFootnotes().Should().Contain(pbFootnote => pbFootnote.Text.Trim() == _pbfText);
         }
 
         [Then(@"NPB Footnote text should be adequate")]
         public void ThenNPBFootnoteTextShouldBeAdequate()
         {
-            _poPage.VerifyFootnotePresent(_npbfText).Should().BeTrue($"Non PB Footnote with text - '{_npbfText}' is not present.");
+            _poPage.FetchAllFootnotes().Should().Contain(npbFootnote => npbFootnote.Text.Trim() == _npbfText);
             _poPage.CloseFootnoteButtonClick();
         }
 
         [Then(@"Effective date should be current date")]
         public void ThenEffectiveDateShouldBeCurrentDate()
         {
-            _poPage.VerifyEffectiveStartDate(DateTime.Now.Date).Should().BeTrue("Effective date is not current date.");
-        }
+            string currentDate = DateTime.Now.Date.ToString("MM/dd/yyyy");
 
-        [Then(@"Status is ""([^""]*)""")]
-        public void ThenStatusIs(string status)
-        {
-            _poPage.VerifyPOStatus(status).Should().BeTrue($"Product Offer status is not as expected. Expected to be - {status}");
+            _poPage.FetchEffectiveStartDate().Should().Be(currentDate);
         }
     }
 }

@@ -27,8 +27,16 @@ namespace Tests
 
         private void TakeScreenshot()
         {
-            var screenshot = Driver.TakeScreenshot(TestContext.CurrentContext.Test.Name.Trim('('));
-            if (screenshot != null) TestContext.AddTestAttachment(screenshot);
+            string fullTestName = TestContext.CurrentContext.Test.Name;
+            
+            if(fullTestName.Contains("("))
+            {
+                int indexOfBracket = fullTestName.IndexOf("(");
+                fullTestName = fullTestName.Substring(0, indexOfBracket);
+            }
+
+            string screenshotFilePath = Driver.TakeScreenshot(fullTestName);
+            if (screenshotFilePath != null) TestContext.AddTestAttachment(screenshotFilePath);
         }
 
         public bool TestCompletedWithoutErrors()

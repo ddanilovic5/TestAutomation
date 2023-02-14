@@ -46,7 +46,6 @@ namespace PageObjects
         private ReadOnlyCollection<IWebElement> Products => Driver.Instance.FindElements(By.CssSelector("[col-id='productOfferProduct']"));
         private IWebElement PrimaryRate => Driver.Instance.FindElement(PrimaryRateLocator);
         private IWebElement ViewFootnotesButton => Driver.Instance.FindElement(By.XPath("//*[text()=' View  Footnotes ']")); //consider adding ID
-        private IWebElement FootnoteModalWindow => Driver.Instance.FindElement(By.TagName("ngb-modal-window"));
         private ReadOnlyCollection<IWebElement> AllFootnotes => Driver.Instance.FindElements(By.CssSelector(".product-offer-footnote-detail-wrapper--content"));
         private IWebElement CloseFootnoteButton => Driver.Instance.FindElement(By.CssSelector(".btn-close"));
         private IWebElement MultipleSelectButton => Driver.Instance.FindElement(By.CssSelector("[label='Multiple select']"));
@@ -160,39 +159,31 @@ namespace PageObjects
         #endregion
 
         #region Verification
-
-        public IWebElement VerifySuccessPopup()
+        public string FetchPopupMessage()
         {
-            Driver.Wait(3, ()=> Driver.Instance.FindElementsNoWait(PopupMessageLocator).Count != 0);
+            Driver.Wait(3, () => PopupMessage.Text.Trim() != "Please Wait !");
 
-            return PopupMessage;
+            return PopupMessage.Text.Trim();
         }
 
-        public string FetchPopupMessageByText()
-        {
-            string popupMessage = PopupMessage.Text.Trim();
-
-            return popupMessage;
-        }
-
-        public bool VerifyProductIsInTheList(string productName)
+        public ReadOnlyCollection<IWebElement> FetchProductList(string productName)
         {
             Driver.Wait(3, () => Driver.Instance.FindElementsNoWait(By.CssSelector("[ref='leftContainer']")).Count != 0);
 
             GetProductRow(productName); // set row value for other methods
 
-            return Products.FirstOrDefault(x => x.Text.Trim() == productName) != null;
+            return Products;
         }
 
-        public bool VerifyPrimaryRateTypes(string primaryRates)
+        public string FetchPrimaryRateTypes()
         {
             IWebElement productRow = Driver.Instance.FindElement(By.CssSelector(_productRowLocator));
             IWebElement primaryRateElement = productRow.FindElement(PrimaryRateLocator);
 
-            return primaryRateElement.Text.Trim().Contains(primaryRates);
+            return primaryRateElement.Text.Trim();
         }
 
-        public bool VerifyCPC(string cpc)
+        public string FetchCPC()
         {
             IWebElement productRow = Driver.Instance.FindElement(By.CssSelector(_productRowLocator));
             Driver.Wait(TimeSpan.FromSeconds(1));
@@ -213,54 +204,42 @@ namespace PageObjects
                 cpcElement = productRow.FindElement(CPCLocator);
             }
 
-            return cpcElement.Text.Trim().Contains(cpc);
+            return cpcElement.Text.Trim();
         }
 
-        public bool VerifyControlledRebates(string ratio, string value)
+        public string FetchControlledRebates(string ratio)
         {
             IWebElement productRow = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[1];
             IWebElement rebateElement = productRow.FindElement(GetPreferredBrandRatesLocator("Controlled", ratio));
 
-            return rebateElement.Text.Trim().Contains(value);
+            return rebateElement.Text.Trim();
         }
 
-        public bool VerifyRestrictedNPBRate(string value)
+        public string FetchRestrictedNPBRate(string value)
         {
             IWebElement productRow = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[1];
             IWebElement restrictedBidElement = productRow.FindElement(RestrictedBid);
 
-            return restrictedBidElement.Text.Trim().Contains(value);
+            return restrictedBidElement.Text.Trim();
         }
 
-        public bool VerifyFootnotePresent(string text)
+        public ReadOnlyCollection<IWebElement> FetchAllFootnotes()
         {
             Driver.Wait(3, () => Driver.Instance.FindElements(By.CssSelector("[class='modal-body']")).Count != 0);
 
-           // IWebElement footnote = FootnoteModalWindow.FindElements(By.CssSelector(".product-offer-footnote-detail-wrapper--content")).FirstOrDefault(x => x.Text.Trim() == text);
-
-            var nesto = FootnoteModalWindow;
-            var dalje = Driver.Instance.FindElements(By.CssSelector(".product-offer-footnote-detail-wrapper--content"));
-
-            IWebElement footnote = dalje.FirstOrDefault(x => x.Text.Trim() == text);
-
-
-            if (footnote == null)
-                return false;
-
-            return true;
+            return AllFootnotes;
         }
 
-        public bool VerifyEffectiveStartDate(DateTime date)
+        public string FetchEffectiveStartDate()
         {
-            string currentDate = date.ToString("MM/dd/yyyy");
             IWebElement productRow = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[1];
 
             IWebElement effectiveDateElement = productRow.FindElement(EffectiveStartDateLocator);
 
-            return effectiveDateElement.Text.Trim().Equals(currentDate);
+            return effectiveDateElement.Text.Trim();
         }
 
-        public bool VerifyPOStatus(string status)
+        public string FetchPOStatus()
         {
             Driver.Wait(5, () => Driver.Instance.FindElementsNoWait(PopupLocator).Count == 0);
             Driver.Wait(TimeSpan.FromSeconds(1));
@@ -268,7 +247,7 @@ namespace PageObjects
             IWebElement productRow = Driver.Instance.FindElements(By.CssSelector(_productRowLocator))[1];
             IWebElement statusElement = productRow.FindElement(POStatusLocator);
 
-            return statusElement.Text.Trim().Equals(status);
+            return statusElement.Text.Trim();
         }
 
         #endregion

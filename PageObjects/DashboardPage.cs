@@ -3,6 +3,7 @@ using SeleniumHelpers;
 using SeleniumHelpers.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace PageObjects
         private IWebElement AssignedToMeForNeg => Driver.Instance.FindElement(AssignedToMeForNegLocator);
         private IWebElement AssignedToAscent => Driver.Instance.FindElement(AssignedToAscentLocator);
         private IWebElement AssignedToMe => Driver.Instance.FindElement(AssignedToMeLocator);
-        private IReadOnlyCollection<IWebElement> AllAssignedProductOffers => Driver.Instance.FindElements(By.CssSelector("[ref='eValue']"));
+        private ReadOnlyCollection<IWebElement> AllAssignedProductOffers => Driver.Instance.FindElements(By.CssSelector("[ref='eValue']"));
 
         #region Methods
 
@@ -57,23 +58,12 @@ namespace PageObjects
 
         #region Verifications
 
-        public bool VerifySentProductOfferListed(string matrixName, string manufacturerName)
+        public ReadOnlyCollection<IWebElement> FetchSentProductOfferListed()
         {
             Driver.Wait(TimeSpan.FromSeconds(3));
-           
             Driver.Wait(5, () => Driver.Instance.FindElements(By.CssSelector("[ref='eBodyViewport']")).Count != 0);
             
-            // TA_Matrix (Manufacturer A)
-            string poName = $"{matrixName} ({manufacturerName})";
-
-            IWebElement productOffer = AllAssignedProductOffers.FirstOrDefault(x => x.Text.Trim().Contains(poName));
-
-            if(productOffer == null) 
-            {
-                return false;
-            }
-
-            return true;
+            return AllAssignedProductOffers;
         }
 
         #endregion

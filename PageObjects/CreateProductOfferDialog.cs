@@ -14,7 +14,6 @@ namespace PageObjects
     public class CreateProductOfferDialog
     {
         private By ValidDropdownSelectionLocator => By.CssSelector("select.ng-valid");
-        private By DropdownListLocator => By.CssSelector(".dropdown-list li");
         private By DropdownSelectedValuesLocator => By.CssSelector(".multiselect-dropdown .selected-item");
 
         private IWebElement ProductDetailsSection => Driver.Instance.FindElement(By.XPath("//div[@id='productDetailsTitle']/.."));

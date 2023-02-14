@@ -12,12 +12,13 @@ namespace SeleniumHelpers
 
         public static Browsers CurrentBrowser =>
             (Browsers)Enum.Parse(typeof(Browsers),
-                Environment.GetEnvironmentVariable("WebDriverBrowser") ?? "Chrome");
+                Environment.GetEnvironmentVariable("WebDriverBrowserEnv") ?? "Chrome");
 
         public static void InitializeDriver()
         {
             Instance?.Quit();
 
+            string stagod = Environment.GetEnvironmentVariable("WebDriverBrowserEnv");
             switch (CurrentBrowser)
             {
                 case Browsers.Chrome:
@@ -54,10 +55,11 @@ namespace SeleniumHelpers
         {
             try
             {
-                var fileName = Path.Combine($"{Path.GetTempPath()}", $"{testName}_{DateTime.UtcNow:yyyyMMdd}.png");
-                var ss = ((ITakesScreenshot)Instance).GetScreenshot();
-                ss.SaveAsFile(fileName, ScreenshotImageFormat.Png);
-                return fileName;
+                string filePath = Path.Combine($"{Path.GetTempPath()}", $"{testName}_{DateTime.UtcNow:yyyyMMdd}.png");
+                Screenshot ss = ((ITakesScreenshot)Instance).GetScreenshot();
+                ss.SaveAsFile(filePath, ScreenshotImageFormat.Png);
+
+                return filePath;
             }
             catch (Exception e)
             {

@@ -26,6 +26,6 @@ Scenario: Send Product Offer for approval
 	And I login as user 'Neg'
 	And I prepare for sending created product for approval to 'CS'
 	When I send selected product offer for CS review
-	Then I will get confirmation that sending is successful
+	Then I will get confirmation that bulk action is successful
 	And Status of that product offer will be 'In review'
 	And 'CS' will see sent product offer on his dashboard 'Assigned to Ascent'

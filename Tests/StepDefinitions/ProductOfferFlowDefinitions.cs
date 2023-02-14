@@ -20,7 +20,6 @@ namespace Tests.StepDefinitions
         private DashboardPage _dashboardPage;
         private CommonData _commonData;
 
-        private string _popupMessage = "Send to Ascent was successful!";
         public ProductOfferFlowDefinitions(ProductOfferStepDefinitions poSteps, MatrixPage matrixPage, ProductOfferPage poPage, LoginPage loginPage, DashboardPage dashboardPage, CommonData commonData)
         {
             _poSteps= poSteps;
@@ -54,13 +53,13 @@ namespace Tests.StepDefinitions
         [Then(@"I will get confirmation that sending is successful")]
         public void ThenIWillGetConfirmationThatSendingIsSuccessful()
         {
-            _poPage.VerifySuccessPopup().Should().NotBeNull("because successful confirmation popup should appear after sending");
+            _poPage.FetchPopupMessage().Should().Contain("Send to Ascent was successful!");
         }
 
         [Then(@"Status of that product offer will be '([^']*)'")]
         public void ThenStatusOfThatProductOfferWillBe(string status)
         {
-            Assert.IsTrue(_poPage.VerifyPOStatus(status), $"PO Status was not as expected. Expected was {status}");
+            _poPage.FetchPOStatus().Should().Be(status);
         }
 
         [Then(@"'([^']*)' will see sent product offer on his dashboard '([^']*)'")]
@@ -77,7 +76,10 @@ namespace Tests.StepDefinitions
                 _dashboardPage.AssignedToAscentClick();
             }
 
-            Assert.IsTrue(_dashboardPage.VerifySentProductOfferListed(_commonData.MatrixName, "Manufacturer A"), $"Product offer for {_commonData.MatrixName} is not listed for negotiation!");
+            // TA_Matrix (Manufacturer A)
+            string poName = $"{_commonData.MatrixName} ({_commonData.ManufacturerName})";
+
+            _dashboardPage.FetchSentProductOfferListed().Should().Contain(matrix => matrix.Text.Trim().Contains(poName));
         }
 
         // --------------------------- TC2 ---------------------------
@@ -100,6 +102,12 @@ namespace Tests.StepDefinitions
         public void WhenISendSelectedProductOfferForCSReview()
         {
             _poPage.CSReviewButtonClick();
+        }
+
+        [Then(@"I will get confirmation that bulk action is successful")]
+        public void ThenIWillGetConfirmationThatBulkActionIsSuccessful()
+        {
+            _poPage.FetchPopupMessage().Should().Contain("Bulk action successfully executed");
         }
     }
 }
